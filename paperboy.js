@@ -1,10 +1,13 @@
 (function(factory) {
 
+	//AMD
 	if(typeof define === 'function' && define.amd) {
 		define(factory);
 
+	//NODE
 	} else if(typeof module === 'object' && module.exports) {
 		module.exports = factory();
+
 	//GLOBAL
 	} else {
 		window.paperboy = factory();
