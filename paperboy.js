@@ -1,3 +1,8 @@
+/* 
+Copyright 2013 Stu Kabakoff
+https://github.com/sakabako/paperboy
+MIT Licensed
+*/
 (function(factory) {
 
 	//AMD
