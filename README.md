@@ -19,12 +19,12 @@ myObject.on('myevent', function() {
 
 ## Methods
 
-* `paperboy.mixin( target, [eventNames] )`
+* `paperboy.mixin( target /*, [eventNames]*/ )`
  * Adds `on`, `one`, and `off` to `target`.
  * Returns the trigger function.
  * If an array of event names is passed it will be used as a whitelist of event names. An error will be thrown for anything different.
 * `paperboy.emitter( /*[eventNames]*/ )`
-** Returns a new object with `on`, `one`, `off`, and `trigger` functions.
+ * Returns a new object with `on`, `one`, `off`, and `trigger` functions.
 
 ## Why Paperboy?
 
