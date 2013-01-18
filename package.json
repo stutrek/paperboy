@@ -1,0 +1,20 @@
+{
+  "name": "paperboy",
+  "version": "1.0.0",
+  "author": "Stu Kabakoff <stukabakoff@gmail.com>",
+  "description": "A small and simple event mixin",
+  "contributors": [ 
+	{
+	  "name": "Stu Kabakoff",
+	  "email": "stukabakoff@gmail.com"
+	}
+  ],
+  "repository": {
+	"type": "git",
+	"url": "https://github.com/sakabako/paperboy.git"
+  },
+  "keywords": [
+	"events"
+  ],
+  "dependencies" : {}
+}
