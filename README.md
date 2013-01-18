@@ -11,9 +11,12 @@ var myObject = {'foo':'bar'};
 
 var trigger = paperboy.mixin( myObject );
 
-myObject.on('myevent', function() {
+myObject.on('myEvent', function( howMany ) {
+	console.log( howMany ); // 5
 	console.log( this ); // myObject
-})
+});
+
+trigger('myevent', 5);
 
 ```
 
