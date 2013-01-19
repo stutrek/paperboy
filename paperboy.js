@@ -92,7 +92,7 @@ MIT Licensed
 			}
 		}
 		
-		function accepts( eventName ) {
+		target.on.accepts = function( eventName ) {
 			if (enforceTypes) {
 				return eventTypes.indexOf(eventName) !== -1;
 			} else {
@@ -103,7 +103,7 @@ MIT Licensed
 		target.repeat = function( emitter, events ) {
 			if (events) {
 				for (var i = 0; i < events.length; i += 1 ) {
-					if (accepts(events[i]) === false) {
+					if (target.on.accepts(events[i]) === false) {
 						error( 'repeat', events[i] );
 					}
 				}

@@ -103,9 +103,11 @@ test('emitter.repeat', function(t) {
 
 	t.equal(typeof emitterA.repeat, 'function', 'emitter.repeat should be a function.');
 
-	emitterA.repeat(emitterB, ['event', 'one', 'two', 'three']);
+	emitterA.repeat(emitterB, ['one', 'two', 'three']);
 	emitterA.repeat(emitterC);
-
+	
+	t.ok(true, 'repeat calls succeed');
+	
 	emitterA.on('one', function() {
 		results.push('one');
 	});
@@ -119,11 +121,15 @@ test('emitter.repeat', function(t) {
 		results.push('event');
 	});
 
+	t.ok(true, 'on calls succeed');
+	
 	emitterB.trigger('one');
 	emitterB.trigger('two');
 	emitterB.trigger('three');
 	emitterC.trigger('event');
 	emitterC.trigger('dontrepeat');
+	
+	t.ok(true, 'trigger calls succeed');
 
 	t.equal(results.toString(), ['one', 'two', 'three', 'event'].toString(), "Repeat should echo the events emitted by any emitters passed into it.");
 	t.end && t.end();
