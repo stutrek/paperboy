@@ -54,3 +54,5 @@ Listeners applied to the `*` event will be triggered for each event. The first a
 * The `trigger` function is private by default, making it easier to write safe code. If you want it to be public simply add it to the target.
 * Removing a listener in a callback will not cause it to skip the next listener.
 * It's small, under 1k minified and gzipped.
+
+Inspired by [LucidJS](https://github.com/RobertWHurst/LucidJS)
