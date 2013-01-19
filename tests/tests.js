@@ -19,7 +19,7 @@ test('emitter', function(t) {
 
 test('emitter.on', function(t) {
 	t = t || window;
-	var emitter = paperboy.emitter(), fired = false, args = [];
+	var emitter = paperboy.emitter(), fired = false, args = [], starWorks = false;
 
 	t.equal(typeof emitter.on, 'function', 'emitter.on should be a function.');
 
@@ -27,10 +27,15 @@ test('emitter.on', function(t) {
 	emitter.on('exec', function(){ 
 		args = Array.prototype.slice.apply(arguments);
 	});
+	emitter.on('*', function( type ) {
+		starWorks = type === 'exec';
+	})
 	emitter.trigger('exec', 1, 2, 3);
 
 	t.ok(fired, 'emitter.on should fire its callback(s) when the event bound is fired.');
 	t.ok(args[0] === 1 && args[1] === 2 && args[2] === 3, 'Any arguments passed into trigger should be passed into the callback(s).');
+	t.ok( starWorks, '* events are working.');
+	
 	t.end && t.end();
 });
 

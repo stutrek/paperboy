@@ -20,6 +20,8 @@ MIT Licensed
 
 })(function() {
 	var exports = {};
+	var aps = Array.prototype.slice;
+	
 	exports.mixin = function( target, eventTypes ){
 		
 		var events = {'*':[]};
@@ -72,14 +74,14 @@ MIT Licensed
 			// trigger all * events
 			var callbacks = events['*'].slice();
 			for (var i = 0; i < callbacks.length; i++){
-				callbacks[i].callback.apply(target, arguments);
+				callbacks[i].callback.apply(target, aps.call(arguments));
 				if (callbacks[i].isOne) {
 					target.off(type, callbacks[i].callback);
 				}
 			}
 			// trigger listeners for this type, if any
 			if (events[type]) {
-				var args = Array.prototype.slice.call(arguments, 1);
+				var args = aps.call(arguments, 1);
 				callbacks = events[type].slice();
 				for (var i = 0; i < callbacks.length; i++){
 					callbacks[i].callback.apply(target, args);
@@ -90,7 +92,7 @@ MIT Licensed
 			}
 		}
 		
-		function accepts( eventName ) {
+		target.on.accepts = function( eventName ) {
 			if (enforceTypes) {
 				return eventTypes.indexOf(eventName) !== -1;
 			} else {
@@ -101,7 +103,7 @@ MIT Licensed
 		target.repeat = function( emitter, events ) {
 			if (events) {
 				for (var i = 0; i < events.length; i += 1 ) {
-					if (accepts(events[i]) === false) {
+					if (target.on.accepts(events[i]) === false) {
 						error( 'repeat', events[i] );
 					}
 				}
