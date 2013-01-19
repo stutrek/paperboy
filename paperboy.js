@@ -26,9 +26,9 @@ MIT Licensed
 		var enforceTypes = !!eventTypes;
 		
 		if (eventTypes) {
-			eventTypes.forEach(function(type) {
-				events[type] = [];
-			});
+			for (var i = 0; i < eventTypes.length; i += 1) {
+				events[eventTypes[i]] = [];
+			}
 		}
 		
 		target.on = function (type, callback, isOne) {
