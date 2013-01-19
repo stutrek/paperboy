@@ -16,5 +16,18 @@
   "keywords": [
 	"events"
   ],
-  "dependencies" : {}
+  "dependencies" : {},
+  "devDependencies": {
+    "tape": "~0.0.4"
+  },
+  "testling": {
+    "files": "tests/tests.js",
+    "browsers": {
+	  "ie": [ 6, 7, 8, 9 ],
+	  "firefox": [ 3 ],
+	  "chrome": [ 4 ],
+	  "safari": [ 4 ],
+	  "opera": [ 9 ]
+	}
+  }
 }

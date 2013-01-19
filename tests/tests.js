@@ -1,16 +1,27 @@
-test('emitter', function() {
-	var emitter, element = document.createElement('div'), clicked = false;
+var paperboy;
+try {
+	paperboy = require('../paperboy');
+	var test = require('tape');
+} catch(e) {
+	paperboy = window.paperboy;
+}
+
+test('emitter', function(t) {
+	t = t || window;
 	
 	var mixedin = {"a": 1};
 	paperboy.mixin(mixedin);
-	ok(mixedin.a === 1, 'Passing an object into paperboy.mixin(object) should return the same object augmented with the emitter methods.');
 
+	t.ok(mixedin.a === 1, 'Passing an object into paperboy.mixin(object) should return the same object augmented with the emitter methods.');
+	
+	t.end && t.end();
 });
 
-test('emitter.on', function() {
+test('emitter.on', function(t) {
+	t = t || window;
 	var emitter = paperboy.emitter(), fired = false, args = [];
 
-	equal(typeof emitter.on, 'function', 'emitter.on should be a function.');
+	t.equal(typeof emitter.on, 'function', 'emitter.on should be a function.');
 
 	emitter.on('exec', function() { fired = true; });
 	emitter.on('exec', function(){ 
@@ -18,27 +29,31 @@ test('emitter.on', function() {
 	});
 	emitter.trigger('exec', 1, 2, 3);
 
-	ok(fired, 'emitter.on should fire its callback(s) when the event bound is fired.');
-	ok(args[0] === 1 && args[1] === 2 && args[2] === 3, 'Any arguments passed into trigger should be passed into the callback(s).');
+	t.ok(fired, 'emitter.on should fire its callback(s) when the event bound is fired.');
+	t.ok(args[0] === 1 && args[1] === 2 && args[2] === 3, 'Any arguments passed into trigger should be passed into the callback(s).');
+	t.end && t.end();
 });
 
-test('emitter.once', function() {
+test('emitter.once', function(t) {
+	t = t || window;
 	var emitter = paperboy.emitter(), fired;
 
-	equal(typeof emitter.once, 'function', 'emitter.once should be a function.');
+	t.equal(typeof emitter.once, 'function', 'emitter.once should be a function.');
 
 	emitter.once('exec', function() { fired = true; });
 	emitter.trigger('exec');
 	if(fired) { fired = 2; }
 	emitter.trigger('exec');
 
-	ok(fired === 2, 'emitter.once should only fire once. It should delete itself after fired.');
+	t.ok(fired === 2, 'emitter.once should only fire once. It should delete itself after fired.');
+	t.end && t.end();
 });
 
-test('emitter.off', function() {
+test('emitter.off', function(t) {
+	t = t || window;
 	var emitter = paperboy.emitter(), fired;
 
-	equal(typeof emitter.off, 'function', 'emitter.off should be a function.');
+	t.equal(typeof emitter.off, 'function', 'emitter.off should be a function.');
 	var listener = function() { fired = true; }
 	emitter.on('exec', listener);
 	emitter.trigger('exec');
@@ -46,13 +61,15 @@ test('emitter.off', function() {
 	if(fired) { fired = 2; }
 	emitter.trigger('exec');
 
-	ok(fired === 2, 'events should not be triggered after being removed.');
+	t.ok(fired === 2, 'events should not be triggered after being removed.');
+	t.end && t.end();
 });
 
-test('emitter.trigger', function() {
+test('emitter.trigger', function(t) {
+	t = t || window;
 	var emitter = paperboy.emitter(), results = [];
 
-	equal(typeof emitter.trigger, 'function', 'emitter.trigger should be a function.');
+	t.equal(typeof emitter.trigger, 'function', 'emitter.trigger should be a function.');
 
 	emitter.on('red', function(red) {
 		results.push(red);
@@ -71,7 +88,8 @@ test('emitter.trigger', function() {
 	emitter.trigger('blue', 'red', 'blue', 'green');
 	emitter.trigger('green', 'red', 'blue', 'green');
 
-	equal(results.toString(), ['red', 'blue'].toString(), "When multiple events are triggered, they should be fired in the correct order.");
+	t.equal(results.toString(), ['red', 'blue'].toString(), "When multiple events are triggered, they should be fired in the correct order.");
+	t.end && t.end();
 });
 
 // test('emitter.set', function() {
