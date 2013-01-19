@@ -92,10 +92,11 @@ test('emitter.trigger', function(t) {
 	t.end && t.end();
 });
 
-test('emitter.repeat', function() {
+test('emitter.repeat', function(t) {
+	t = t || window;
 	var emitterA = paperboy.emitter(), emitterB = paperboy.emitter(), emitterC = paperboy.emitter(), results = [];
 
-	equal(typeof emitterA.repeat, 'function', 'emitter.repeat should be a function.');
+	t.equal(typeof emitterA.repeat, 'function', 'emitter.repeat should be a function.');
 
 	emitterA.repeat(emitterB, ['event', 'one', 'two', 'three']);
 	emitterA.repeat(emitterC);
@@ -119,7 +120,8 @@ test('emitter.repeat', function() {
 	emitterC.trigger('event');
 	emitterC.trigger('dontrepeat');
 
-	equal(results.toString(), ['one', 'two', 'three', 'event'].toString(), "Repeat should echo the events emitted by any emitters passed into it.");
+	t.equal(results.toString(), ['one', 'two', 'three', 'event'].toString(), "Repeat should echo the events emitted by any emitters passed into it.");
+	t.end && t.end();
 });
 
 // test('emitter.set', function() {
