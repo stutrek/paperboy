@@ -1,7 +1,3 @@
-
-//event triggering pollyfill
-function trigger(eventName, element) {var a;if(document.createEvent){a=document.createEvent("HTMLEvents");a.initEvent(eventName,true,true);}else{a=document.createEventObject();a.eventType=eventName;}if(document.createEvent){element.dispatchEvent(a);}else{element.fireEvent(a.eventType,a);}}
-
 test('emitter', function() {
 	var emitter, element = document.createElement('div'), clicked = false;
 	
