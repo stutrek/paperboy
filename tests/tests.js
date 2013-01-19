@@ -92,6 +92,36 @@ test('emitter.trigger', function(t) {
 	t.end && t.end();
 });
 
+test('emitter.repeat', function() {
+	var emitterA = paperboy.emitter(), emitterB = paperboy.emitter(), emitterC = paperboy.emitter(), results = [];
+
+	equal(typeof emitterA.repeat, 'function', 'emitter.repeat should be a function.');
+
+	emitterA.repeat(emitterB, ['event', 'one', 'two', 'three']);
+	emitterA.repeat(emitterC);
+
+	emitterA.on('one', function() {
+		results.push('one');
+	});
+	emitterA.on('two', function() {
+		results.push('two');
+	});
+	emitterA.on('three', function() {
+		results.push('three');
+	});
+	emitterA.on('event', function() {
+		results.push('event');
+	});
+
+	emitterB.trigger('one');
+	emitterB.trigger('two');
+	emitterB.trigger('three');
+	emitterC.trigger('event');
+	emitterC.trigger('dontrepeat');
+
+	equal(results.toString(), ['one', 'two', 'three', 'event'].toString(), "Repeat should echo the events emitted by any emitters passed into it.");
+});
+
 // test('emitter.set', function() {
 // 	var emitter = paperboy.emitter(), result = '';
 // 

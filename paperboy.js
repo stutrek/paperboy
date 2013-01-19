@@ -22,7 +22,7 @@ MIT Licensed
 	var exports = {};
 	exports.mixin = function( target, eventTypes ){
 		
-		var events = {};
+		var events = {'*':[]};
 		var enforceTypes = !!eventTypes;
 		
 		if (eventTypes) {
@@ -31,10 +31,14 @@ MIT Licensed
 			}
 		}
 		
+		function error( triedTo, eventName ) {
+			throw new Error('tried to '+triedTo+' a non-existent event type: '+type+'. Options are: '+eventTypes.join(', '));
+		}
+		
 		target.on = function (type, callback, isOne) {
 			isOne = !!isOne;
 			if (enforceTypes && !events[type]) {
-				throw new Error('tried to add a non-existent event type: '+type);
+				error( 'add', type );
 			} else if (!events[type]) {
 				events[type] = [];
 			}
@@ -47,7 +51,7 @@ MIT Licensed
 		
 		target.off = function (type, callback) {
 			if (enforceTypes && !events[type]) {
-				throw new Error('tried to remove a non-existent event type: '+type);
+				error( 'remove', type );
 			} else if (!events[type]) {
 				return;
 			}
@@ -61,19 +65,55 @@ MIT Licensed
 		
 		function trigger(type /* , args... */ ){
 			if (enforceTypes && !events[type]) {
-				throw new Error('tried to trigger a non-existent event type: '+type);
-			} else if (!events[type]) {
+				error( 'trigger', type );
+			} else if (!events[type] && events['*'].length === 0) {
 				return;
 			}
-			var args = Array.prototype.slice.call(arguments, 1);
-			var callbacks = events[type].slice();
+			// trigger all * events
+			var callbacks = events['*'].slice();
 			for (var i = 0; i < callbacks.length; i++){
-				callbacks[i].callback.apply(target, args);
+				callbacks[i].callback.apply(target, arguments);
 				if (callbacks[i].isOne) {
 					target.off(type, callbacks[i].callback);
 				}
 			}
+			// trigger listeners for this type, if any
+			if (events[type]) {
+				var args = Array.prototype.slice.call(arguments, 1);
+				callbacks = events[type].slice();
+				for (var i = 0; i < callbacks.length; i++){
+					callbacks[i].callback.apply(target, args);
+					if (callbacks[i].isOne) {
+						target.off(type, callbacks[i].callback);
+					}
+				}
+			}
 		}
+		
+		target.on.accepts = function( eventName ) {
+			if (enforceTypes) {
+				return eventTypes.indexOf(eventName) !== -1;
+			} else {
+				return true;
+			}
+		};
+		
+		target.repeat = function( emitter, events ) {
+			if (events) {
+				for (var i = 0; i < events.length; i += 1 ) {
+					if (target.on.accepts(events[i]) === false) {
+						error( 'repeat', events[i] );
+					}
+				}
+			}
+			emitter.on('*', function(type) {
+				if (!events || events.indexOf( type ) !== -1) {
+					trigger.apply( target, arguments );
+				}
+			});
+		};
+		
+		
 		
 		return trigger;
 	};
