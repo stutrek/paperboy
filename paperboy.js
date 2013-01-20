@@ -27,6 +27,15 @@ MIT Licensed
 		var events = {'*':[]};
 		var enforceTypes = !!eventTypes;
 		
+		function indexOf( array, item ) {
+			for( var i = 0; i < array.length; i += 1 ) {
+				if (array[i] === item) {
+					return i;
+				}
+			}
+			return -1;
+		}
+		
 		if (eventTypes) {
 			for (var i = 0; i < eventTypes.length; i += 1) {
 				events[eventTypes[i]] = [];
@@ -94,7 +103,7 @@ MIT Licensed
 		
 		target.on.accepts = function( eventName ) {
 			if (enforceTypes) {
-				return eventTypes.indexOf(eventName) !== -1;
+				return indexOf( eventTypes, eventName) !== -1;
 			} else {
 				return true;
 			}
@@ -109,7 +118,7 @@ MIT Licensed
 				}
 			}
 			emitter.on('*', function(type) {
-				if (!events || events.indexOf( type ) !== -1) {
+				if (!events || indexOf( events, type ) !== -1) {
 					trigger.apply( target, arguments );
 				}
 			});
