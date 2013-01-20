@@ -3,7 +3,7 @@ Paperboy
 
 A simple event emitter and mixin.
 
-[![browser support](http://ci.testling.com/sakabako/Paperboy.png)](http://ci.testling.com/sakabako/paperboy)
+[![browser support](http://ci.testling.com/sakabako/paperboy.png)](http://ci.testling.com/sakabako/paperboy)
 
 ## Basic Usage
 
