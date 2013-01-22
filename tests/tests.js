@@ -97,14 +97,14 @@ test('emitter.trigger', function(t) {
 	t.end && t.end();
 });
 
-test('emitter.repeat', function(t) {
+test('trigger.repeat', function(t) {
 	t = t || window;
 	var emitterA = paperboy.emitter(), emitterB = paperboy.emitter(), emitterC = paperboy.emitter(), results = [];
 
-	t.equal(typeof emitterA.repeat, 'function', 'emitter.repeat should be a function.');
+	t.equal(typeof emitterA.trigger.repeat, 'function', 'emitter.repeat should be a function.');
 
-	emitterA.repeat(emitterB, ['one', 'two', 'three']);
-	emitterA.repeat(emitterC);
+	emitterA.trigger.repeat(emitterB, ['one', 'two', 'three']);
+	emitterA.trigger.repeat(emitterC);
 		
 	emitterA.on('one', function() {
 		results.push('one');

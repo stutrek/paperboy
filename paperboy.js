@@ -109,19 +109,29 @@ MIT Licensed
 			}
 		};
 		
-		target.repeat = function( emitter, events ) {
+		trigger.repeat = function( emitter, events ) {
 			if (events) {
 				for (var i = 0; i < events.length; i += 1 ) {
-					if (target.on.accepts(events[i]) === false) {
+					// if it's not a paperboy emitter, or is a paperboy emitter that supports this event
+					if (!target.on.accepts || target.on.accepts(events[i])) {
+						(function( eventName ) {
+							emitter.on(events[i], function() {
+								var args = aps.call(arguments);
+								args.unshift(eventName);
+								trigger.apply( target, args );
+							})
+						})(events[i]);
+					} else {
 						error( 'repeat', events[i] );
 					}
 				}
+			} else {
+				emitter.on('*', function(type) {
+					if (!events || indexOf( events, type ) !== -1) {
+						trigger.apply( target, arguments );
+					}
+				});
 			}
-			emitter.on('*', function(type) {
-				if (!events || indexOf( events, type ) !== -1) {
-					trigger.apply( target, arguments );
-				}
-			});
 		};
 		
 		
