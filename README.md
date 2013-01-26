@@ -3,7 +3,7 @@ Paperboy
 
 A simple event emitter and mixin.
 
-[![browser support](http://ci.testling.com/sakabako/Paperboy.png)](http://ci.testling.com/sakabako/paperboy)
+[![browser support](http://ci.testling.com/sakabako/paperboy.png)](http://ci.testling.com/sakabako/paperboy)
 
 ## Basic Usage
 
@@ -13,7 +13,7 @@ var myObject = {'foo':'bar'};
 
 var trigger = paperboy.mixin( myObject );
 
-myObject.on('myEvent', function( howMany ) {
+myObject.on('myevent', function( howMany ) {
 	console.log( howMany ); // 5
 	console.log( this ); // myObject
 });
