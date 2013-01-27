@@ -1,5 +1,5 @@
 {
-  "name": "paperboy",
+  "name": "paperboy-events",
   "version": "1.0.0",
   "author": "Stu Kabakoff <stukabakoff@gmail.com>",
   "description": "A lightweight, chainable, safe event emitter and mixin.",
