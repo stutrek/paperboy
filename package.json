@@ -2,7 +2,7 @@
   "name": "paperboy",
   "version": "1.0.0",
   "author": "Stu Kabakoff <stukabakoff@gmail.com>",
-  "description": "A small and simple event mixin",
+  "description": "A lightweight, chainable, safe event emitter and mixin.",
   "contributors": [ 
 	{
 	  "name": "Stu Kabakoff",
