@@ -24,14 +24,50 @@ trigger('myevent', 5);
 
 ## Methods
 
-* `paperboy.emitter( /*[eventNames]*/ )`
- * Returns a new object with `on`, `one`, `off`, and `trigger` functions.
- * If an array of event names is passed it will be used as a whitelist of event names. An error will be thrown for anything different.
-* `paperboy.mixin( target /*, [eventNames]*/ )`
- * Adds `on`, `one`, and `off` to `target`.
- * Returns the `trigger` function, _does not add it to the target_.
+* `var trigger = paperboy.mixin( target )` - Adds `on`, `one`, and `off` to `target`. Returns the `trigger` function.
+* `paperboy.emitter()` -  Returns a new object with `on`, `one`, `off`, and `trigger` functions.
 
-## Emitters
+_NOTE: `paperboy.mixin` returns the trigger function. It does not add it to the target._
+
+## Whitelisting Events
+
+To catch errors early, before they hit production, you can whitelist event names. If anyone tries to add to or trigger events that are not white listed an error will be thrown.
+
+```javascript
+// with a mixin
+var target = {};
+var trigger = paperboy.mixin( target, ['eventOne', 'eventTwo']);
+
+// with an emitter
+var emitter = paperboy.emitter(['eventOne', 'eventTwo']);
+
+emitter.on('eventOne', function(){}); // works
+emitter.on('eventOen', function(){}); // throws an error
+```
+
+## Chaining Emitters
+
+You can have a paperboy emitter repeat the events triggered by other emitters. This is done with the `repeat` property of the `trigger` function.
+
+
+```javascript
+// This will cause `emitter` to echo every event that `otherPaperboyEmitter` triggers.
+emitter.trigger.repeat( otherPaperboyEmitter );
+
+// This will cause `emitter` to echo specific events that `otherEmitter` throws.
+// You can even repeat events from jQuery objects or anything else with an `on` function.
+emitter.trigger.repeat( otherEmitter, ['pickup', 'putdown'] );
+emitter.trigger.repeat( $('.button'), ['click'] );
+emitter.trigger.repeat( backboneModel, ['update'] );
+```
+
+If you specify a list of events to repeat you can use emitters from jQuery, Backbone, or other libraries. You can only repeat all events from other paperboy emitters.
+
+## The Magic `*` Event
+
+Listeners applied to the `*` event will be triggered for each event. The first argument will be the event name.
+
+## Emitter Details
 
 Emitters trigger event listeners. The `mixin` function turns any object into an emitter.
 
@@ -42,27 +78,6 @@ Emitters trigger event listeners. The `mixin` function turns any object into an 
 * `emitter.trigger.repeat( otherEmitter /*, [eventNames] */ )` - Causes this emitter to repeat events triggered on another emitter.
 
 NOTE: `trigger` is not added by the mixin function. If you want trigger to be public you must attach it to the target yourself.
-
-## The Magic `*` Event
-
-Listeners applied to the `*` event will be triggered for each event. The first argument will be the event name.
-
-## `trigger.repeat`
-
-You can have one emitter throw all the events or a subset of events that another one throws.
-
-This will cause `emitter` to echo every event that `otherEmitter` triggers:
-
-```javascript
-emitter.trigger.repeat( otherEmitter );
-```
-
-This will cause `emitter` to echo every `pickup` and `putdown` event that `otherEmitter` throws:
-
-```javascript
-emitter.trigger.repeat( otherEmitter, ['pickup', 'putdown'] );
-```
-If you specify events, `otherEmitter` can be anything with and `on` function, including jQuery objects. If you do not specify events, `otherEmitter` must be a paperboy emitter.
 
 ## Why Paperboy?
 
