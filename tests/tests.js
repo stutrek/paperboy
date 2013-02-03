@@ -39,13 +39,13 @@ test('emitter.on', function(t) {
 	t.end && t.end();
 });
 
-test('emitter.once', function(t) {
+test('emitter.one', function(t) {
 	t = t || window;
 	var emitter = paperboy.emitter(), fired;
 
-	t.equal(typeof emitter.once, 'function', 'emitter.once should be a function.');
+	t.equal(typeof emitter.one, 'function', 'emitter.one should be a function.');
 
-	emitter.once('exec', function() { fired = true; });
+	emitter.one('exec', function() { fired = true; });
 	emitter.trigger('exec');
 	if(fired) { fired = 2; }
 	emitter.trigger('exec');

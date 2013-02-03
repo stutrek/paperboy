@@ -22,85 +22,148 @@ MIT Licensed
 	var exports = {};
 	var aps = Array.prototype.slice;
 	
-	exports.mixin = function( target, eventTypes ){
+	function indexOf( array, item ) {
+		for( var i = 0; i < array.length; i += 1 ) {
+			if (array[i] === item) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	exports.mixin = function( target, eventTypes, stateTypes ){
 		
 		var events = {'*':[]};
 		var enforceTypes = !!eventTypes;
-		
-		function indexOf( array, item ) {
-			for( var i = 0; i < array.length; i += 1 ) {
-				if (array[i] === item) {
-					return i;
-				}
-			}
-			return -1;
-		}
+
+		var enterStateCallbacks = {'*':[]};
+		var exitStateCallbacks = {'*':[]};
+		var stateStatuses = {};
+		var stateArguments = {};
+		var enforceStates = !!stateTypes;
 		
 		if (eventTypes) {
 			for (var i = 0; i < eventTypes.length; i += 1) {
 				events[eventTypes[i]] = [];
 			}
 		}
+
+		if (stateTypes) {
+			for (var i = 0; i < stateTypes.length; i += 1) {
+				enterStateCallbacks[stateTypes[i]] = [];
+				exitStateCallbacks[stateTypes[i]] = [];
+			}
+		}
 		
 		function error( triedTo, eventName ) {
 			throw new Error('tried to '+triedTo+' a non-existent event type: '+type+'. Options are: '+eventTypes.join(', '));
 		}
-		
-		target.on = function (type, callback, isOne) {
+
+		function addCallback( callbackContainer, enforced, type, callback, isOne ) {
 			isOne = !!isOne;
-			if (enforceTypes && !events[type]) {
+			if (enforced && !callbackContainer[type]) {
 				error( 'add', type );
 			} else if (!events[type]) {
-				events[type] = [];
+				callbackContainer[type] = [];
 			}
-			events[type].push({callback: callback, isOne: isOne});
+			callbackContainer[type].push({callback: callback, isOne: isOne});
+		}
+
+		target.on = function (type, callback, isOne) {
+			addCallback( events, enforceTypes, type, callback, isOne );
 		};
-		
-		target.once = target.one = function (type, callback) {
+		target.on.enter = function (type, callback, isOne) {
+			if (stateStatuses[type]) {
+				callback.apply( target, stateArguments );
+			}
+			addCallback( enterStateCallbacks, enforceStates, type, callback, isOne );
+		};
+		target.on.exit = function (type, callback, isOne) {
+			if (!stateStatuses[type]) {
+				callback.apply( target, stateArguments );
+			}
+			addCallback( exitStateCallbacks, enforceStates, type, callback, isOne );
+		};
+
+		target.one = function (type, callback) {
 			target.on(type, callback, true);
 		};
-		
-		target.off = function (type, callback) {
-			if (enforceTypes && !events[type]) {
+		target.one.enter = function (type, callback) {
+			target.on.enter(type, callback, true);
+		};
+		target.one.exit = function (type, callback) {
+			target.on.exit(type, callback, true);
+		};
+
+		function removeCallback( callbackContainer, enforced, type, callback ) {
+			if (enforced && !callbackContainer[type]) {
 				error( 'remove', type );
-			} else if (!events[type]) {
+			} else if (!callbackContainer[type]) {
 				return;
 			}
-			for (var i = 0, callbackObj; callbackObj = events[type][i]; i += 1) {
+			for (var i = 0, callbackObj; callbackObj = callbackContainer[type][i]; i += 1) {
 				if (callbackObj.callback === callback) {
-					events[type].splice(i, 1);
+					callbackContainer[type].splice(i, 1);
 					return;
 				}
 			}
+		}
+		target.off = function (type, callback) {
+			removeCallback( events, enforceTypes, type, callback );
 		};
-		
-		function trigger(type /* , args... */ ){
-			if (enforceTypes && !events[type]) {
+		target.off.enter = function (type, callback) {
+			removeCallback( enterStateCallbacks, enforceTypes, type, callback );
+		};
+		target.off.exit = function (type, callback) {
+			removeCallback( exitStateCallbacks, enforceTypes, type, callback );
+		};
+
+
+		function triggerCallbacks( callbackContainer, enforced, args ) {
+			var type = args[0];
+			if (enforced && !callbackContainer[type]) {
 				error( 'trigger', type );
-			} else if (!events[type] && events['*'].length === 0) {
+			} else if (!callbackContainer[type] && callbackContainer['*'].length === 0) {
 				return;
 			}
 			// trigger all * events
-			var callbacks = events['*'].slice();
+			var callbacks = callbackContainer['*'].slice();
 			for (var i = 0; i < callbacks.length; i++){
-				callbacks[i].callback.apply(target, aps.call(arguments));
+				callbacks[i].callback.apply(target, args);
 				if (callbacks[i].isOne) {
 					target.off(type, callbacks[i].callback);
 				}
 			}
 			// trigger listeners for this type, if any
-			if (events[type]) {
-				var args = aps.call(arguments, 1);
-				callbacks = events[type].slice();
+			if (callbackContainer[type]) {
+				args.shift();
+				callbacks = callbackContainer[type].slice();
 				for (var i = 0; i < callbacks.length; i++){
 					callbacks[i].callback.apply(target, args);
 					if (callbacks[i].isOne) {
-						target.off(type, callbacks[i].callback);
+						removeCallback( callbackContainer, false, type, callbacks[i].callback);
 					}
 				}
-			}
-		}
-		
+			}			
+		};
+
+		var trigger = function (type /* , args... */ ){
+			var args = aps.call( arguments );
+			triggerCallbacks( events, enforceTypes, args )
+		};
+		trigger.enter = function(type /*, args */) {
+			if (stateStatuses[type]) { return; }
+			var args = aps.call(arguments);
+			stateArguments[type] = args.slice(1);
+			triggerCallbacks( enterStateCallbacks, enforceStates, args );
+		};
+		trigger.exit = function(type /*, args */) {
+			if (stateStatuses[type]) { return; }
+			var args = aps.call(arguments);
+			stateArguments[type] = args.slice(1);
+			triggerCallbacks( enterStateCallbacks, enforceStates, args );
+		};
+
 		target.on.accepts = function( eventName ) {
 			if (enforceTypes) {
 				return indexOf( eventTypes, eventName) !== -1;
