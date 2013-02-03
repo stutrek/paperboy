@@ -65,7 +65,7 @@ MIT Licensed
 			isOne = !!isOne;
 			if (enforced && !callbackContainer[type]) {
 				error( 'add', type );
-			} else if (!events[type]) {
+			} else if (!callbackContainer[type]) {
 				callbackContainer[type] = [];
 			}
 			callbackContainer[type].push({callback: callback, isOne: isOne});
@@ -77,12 +77,18 @@ MIT Licensed
 		target.on.enter = function (type, callback, isOne) {
 			if (stateStatuses[type]) {
 				callback.apply( target, stateArguments[type] );
+				if (isOne) {
+					return;
+				}
 			}
 			addCallback( enterStateCallbacks, enforceStates, type, callback, isOne );
 		};
 		target.on.exit = function (type, callback, isOne) {
 			if (!stateStatuses[type]) {
 				callback.apply( target, stateArguments[type] );
+				if (isOne) {
+					return;
+				}
 			}
 			addCallback( exitStateCallbacks, enforceStates, type, callback, isOne );
 		};
@@ -161,11 +167,11 @@ MIT Licensed
 			triggerCallbacks( enterStateCallbacks, enforceStates, args );
 		};
 		trigger.exit = function(type /*, args */) {
-			if (stateStatuses[type]) { return; }
+			if (!stateStatuses[type]) { return; }
 			var args = aps.call(arguments);
 			stateStatuses[type] = false;
 			stateArguments[type] = args.slice(1);
-			triggerCallbacks( enterStateCallbacks, enforceStates, args );
+			triggerCallbacks( exitStateCallbacks, enforceStates, args );
 		};
 
 		target.on.accepts = function( eventName ) {
