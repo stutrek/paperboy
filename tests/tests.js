@@ -163,12 +163,13 @@ test('emitter.trigger', function(t) {
 
 test('trigger.repeat', function(t) {
 	t = t || window;
-	var emitterA = paperboy.emitter(), emitterB = paperboy.emitter(), emitterC = paperboy.emitter(), results = [];
+	var emitterA = paperboy.emitter(), emitterB = paperboy.emitter(), emitterC = paperboy.emitter(), results = [], stateEnterWorks = false, stateExitWorks = false;
 
 	t.equal(typeof emitterA.trigger.repeat, 'function', 'emitter.repeat should be a function.');
 
 	emitterA.trigger.repeat(emitterB, ['one', 'two', 'three']);
 	emitterA.trigger.repeat(emitterC);
+	emitterA.trigger.repeatStates(emitterB);
 		
 	emitterA.on('one', function() {
 		results.push('one');
@@ -182,6 +183,20 @@ test('trigger.repeat', function(t) {
 	emitterA.on('event', function() {
 		results.push('event');
 	});
+
+	emitterA.on.enter('state', function(){
+		stateEnterWorks = true;
+	});
+	t.equal( stateEnterWorks, false, 'enter was not called early' );
+	emitterB.trigger.enter('state');
+	t.equal( stateEnterWorks, true, 'enter was called on time' );
+
+	emitterA.on.exit('state', function(){
+		stateExitWorks = true;
+	});
+	t.equal( stateExitWorks, false, 'exit is not called early' );
+	emitterB.trigger.exit('state');
+	t.equal( stateExitWorks, true, 'exit is called on time' );
 
 	emitterB.trigger('one');
 	emitterB.trigger('two');

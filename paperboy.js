@@ -188,6 +188,8 @@ MIT Licensed
 				return true;
 			}
 		};
+
+		
 		
 		trigger.repeat = function( emitter, events ) {
 			if (events) {
@@ -195,7 +197,7 @@ MIT Licensed
 					// if it's not a paperboy emitter, or is a paperboy emitter that supports this event
 					if (!target.on.accepts || target.on.accepts(events[i])) {
 						(function( eventName ) {
-							emitter.on(events[i], function() {
+							emitter.on(eventName, function() {
 								var args = aps.call(arguments);
 								args.unshift(eventName);
 								trigger.apply( target, args );
@@ -206,10 +208,38 @@ MIT Licensed
 					}
 				}
 			} else {
-				emitter.on('*', function(type) {
-					if (!events || indexOf( events, type ) !== -1) {
-						trigger.apply( target, arguments );
+				emitter.on('*', function () {
+					trigger.apply( target, arguments );
+				});
+			}
+		};
+
+		trigger.repeatStates = function( emitter, events ) {
+			if (events) {
+				for (var i = 0; i < events.length; i += 1) {
+					if (target.on.enter.accepts(events[i])) {
+						(function (eventName) {
+							emitter.on.enter(eventName, function() {
+								var args = aps.call(arguments);
+								args.unshift(eventName);
+								trigger.enter.apply( target, args );
+							});
+							emitter.on.exit(eventName, function() {
+								var args = aps.call(arguments);
+								args.unshift(eventName);
+								trigger.exit.apply( target, args );
+							});
+						})(events[i]);
+					} else {
+						error( 'repeat state', events[i] );
 					}
+				}
+			} else {
+				emitter.on.enter('*', function () {
+					trigger.enter.apply( target, arguments );
+				});
+				emitter.on.exit('*', function () {
+					trigger.exit.apply( target, arguments );
 				});
 			}
 		};
