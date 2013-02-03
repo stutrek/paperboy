@@ -1,14 +1,13 @@
 Paperboy
 ===========
 
-A simple event emitter and mixin.
+An event emitter and mixin with advanced features that don't get in the way.
 
 [![browser support](http://ci.testling.com/sakabako/paperboy.png)](http://ci.testling.com/sakabako/paperboy)
 
 ## Basic Usage
 
 ```javascript
-
 var myObject = {'foo':'bar'};
 
 var trigger = paperboy.mixin( myObject );
@@ -19,7 +18,6 @@ myObject.on('myevent', function( howMany ) {
 });
 
 trigger('myevent', 5);
-
 ```
 
 ## Methods
@@ -45,10 +43,31 @@ emitter.on('eventOne', function(){}); // works
 emitter.on('eventOen', function(){}); // throws an error
 ```
 
+## Stateful Events
+
+You can create stateful events that operate similar to `$(document).ready()`. When a listener is added to a stateful event it is triggered immediately if your emitter is in that state.
+
+* `emitter.on.enter( stateName, callback )` - adds a stateful listener that fires when the emitter enters stateName.
+* `emitter.one.enter( stateName, callback )` - adds a stateful listener that fires the first time the emitter enters stateName.
+* `emitter.off.enter( stateName, callback )` - removes a listener for when the emitter enters stateName.
+* `emitter.on.exit( stateName, callback )` - adds a stateful listener that fires when the emitter _exits_ stateName.
+* `emitter.one.exit( stateName, callback )` - adds a stateful listener that fires the first time the emitter _exits_ stateName.
+* `emitter.off.exit( stateName, callback )` - removes a stateful listener that fires when the emitter _exits_ stateName.
+* `emitter.trigger.enter( stateName /*, additional, arguments*/ )` - activates stateName.
+* `emitter.trigger.exit( stateName /*, additional, arguments*/)` - deactivates stateName.
+
+```javascript
+emitter.on.enter('live', function(){}); // does not fire immediately.
+emitter.trigger.enter('live'); // fires the listener above.
+emitter.on.enter('live', function(){}); // fires immedately
+
+emitter.trigger.exit('live'); // takes the emitter out of the live state.
+emitter.trigger.enter('live'); // fires both listeners
+```
+
 ## Chaining Emitters
 
 You can have a paperboy emitter repeat the events triggered by other emitters. This is done with the `repeat` property of the `trigger` function.
-
 
 ```javascript
 // This will cause `emitter` to echo every event that `otherPaperboyEmitter` triggers.
@@ -61,7 +80,10 @@ emitter.trigger.repeat( $('.button'), ['click'] );
 emitter.trigger.repeat( backboneModel, ['update'] );
 ```
 
-If you specify a list of events to repeat you can use emitters from jQuery, Backbone, or other libraries. You can only repeat all events from other paperboy emitters.
+If you want to repeat stateful events this must be done separately.
+```javascript
+emitter.trigger.repeatStates( otherPaperboyEmitter /*, [optional, event, names] */);
+```
 
 ## The Magic `*` Event
 
@@ -85,6 +107,6 @@ NOTE: `trigger` is not added by the mixin function. If you want trigger to be pu
 * Passing in a whitelist of event names can prevent bugs.
 * The `trigger` function is private by default, making it easier to write safe code. If you want it to be public simply add it to the target.
 * Removing a listener in a callback will not cause it to skip the next listener.
-* It's small, under 1k minified and gzipped.
+* It's small, 1k minified and gzipped.
 
 Inspired by [LucidJS](https://github.com/RobertWHurst/LucidJS)
