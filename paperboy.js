@@ -19,6 +19,8 @@ MIT Licensed
 	}
 
 })(function() {
+	"use strict";
+
 	var exports = {};
 	var aps = Array.prototype.slice;
 	
@@ -56,7 +58,7 @@ MIT Licensed
 		}
 		
 		function error( triedTo, eventName ) {
-			throw new Error('tried to '+triedTo+' a non-existent event type: '+type+'. Options are: '+eventTypes.join(', '));
+			throw new Error('tried to '+triedTo+' a non-existent event type: '+eventName+'. Options are: '+eventTypes.join(', '));
 		}
 
 		function addCallback( callbackContainer, enforced, type, callback, isOne ) {
@@ -145,11 +147,11 @@ MIT Licensed
 					}
 				}
 			}			
-		};
+		}
 
-		var trigger = function (type /* , args... */ ){
+		var trigger = function ( /* type, args... */ ){
 			var args = aps.call( arguments );
-			triggerCallbacks( events, enforceTypes, args )
+			triggerCallbacks( events, enforceTypes, args );
 		};
 		trigger.enter = function(type /*, args */) {
 			if (stateStatuses[type]) { return; }
@@ -182,7 +184,7 @@ MIT Licensed
 								var args = aps.call(arguments);
 								args.unshift(eventName);
 								trigger.apply( target, args );
-							})
+							});
 						})(events[i]);
 					} else {
 						error( 'repeat', events[i] );
@@ -206,7 +208,7 @@ MIT Licensed
 		var emitter = {};
 		emitter.trigger = exports.mixin(emitter, eventTypes);
 		return emitter;
-	}
+	};
 	
 	return exports;
 });
