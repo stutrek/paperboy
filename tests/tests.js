@@ -70,6 +70,29 @@ test('emitter.off', function(t) {
 	t.end && t.end();
 });
 
+test('emitter.on.enter', function(t) {
+	t = t || window;
+	var emitter = paperboy.emitter(), fired = false, args = [], starWorks = false;
+
+	t.equal(typeof emitter.on.enter, 'function', 'emitter.on.enter should be a function.');
+
+	emitter.on.enter('exec', function() { fired = true; });
+	emitter.on.enter('*', function( type ) {
+		starWorks = type === 'exec';
+	})
+	emitter.trigger.enter('exec', 1, 2, 3);
+	
+	emitter.on.enter('exec', function(){ 
+		args = Array.prototype.slice.apply(arguments);
+	});
+
+	t.ok(fired, 'emitter.on should fire its callback(s) when the event bound is fired.');
+	t.ok(args[0] === 1 && args[1] === 2 && args[2] === 3, 'Arguments should be preserved and used for future enter callbacks');
+	t.ok( starWorks, '* events are working.');
+	
+	t.end && t.end();
+});
+
 test('emitter.trigger', function(t) {
 	t = t || window;
 	var emitter = paperboy.emitter(), results = [];

@@ -76,13 +76,13 @@ MIT Licensed
 		};
 		target.on.enter = function (type, callback, isOne) {
 			if (stateStatuses[type]) {
-				callback.apply( target, stateArguments );
+				callback.apply( target, stateArguments[type] );
 			}
 			addCallback( enterStateCallbacks, enforceStates, type, callback, isOne );
 		};
 		target.on.exit = function (type, callback, isOne) {
 			if (!stateStatuses[type]) {
-				callback.apply( target, stateArguments );
+				callback.apply( target, stateArguments[type] );
 			}
 			addCallback( exitStateCallbacks, enforceStates, type, callback, isOne );
 		};
@@ -156,12 +156,14 @@ MIT Licensed
 		trigger.enter = function(type /*, args */) {
 			if (stateStatuses[type]) { return; }
 			var args = aps.call(arguments);
+			stateStatuses[type] = true;
 			stateArguments[type] = args.slice(1);
 			triggerCallbacks( enterStateCallbacks, enforceStates, args );
 		};
 		trigger.exit = function(type /*, args */) {
 			if (stateStatuses[type]) { return; }
 			var args = aps.call(arguments);
+			stateStatuses[type] = false;
 			stateArguments[type] = args.slice(1);
 			triggerCallbacks( enterStateCallbacks, enforceStates, args );
 		};
@@ -169,6 +171,13 @@ MIT Licensed
 		target.on.accepts = function( eventName ) {
 			if (enforceTypes) {
 				return indexOf( eventTypes, eventName) !== -1;
+			} else {
+				return true;
+			}
+		};
+		target.on.enter.accepts = target.on.exit.accepts = function( stateName ) {
+			if (enforceStates) {
+				return indexOf( stateTypes, stateName) !== -1;
 			} else {
 				return true;
 			}
