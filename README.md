@@ -47,7 +47,7 @@ emitter.on('eventOen', function(){}); // throws an error
 
 You can create stateful events that operate similar to `$(document).ready()`. When a listener is added to a stateful event it is triggered immediately if your emitter is in that state.
 
-All of the emitter functions (`on`, `off`, `one`, and `trigger`) have two properties applied to them, `enter` and `exit`. On `on`, `off`, and `one` these add stateful listeners. Calling `trigger.enter` or `trigger.exit` sets the state of the emitter.
+All of the emitter functions have two properties, `enter` and `exit`. Calling `trigger.enter` or `trigger.exit` sets the state of the emitter and triggers events applied with `emitter.on.enter` or `emitter.on.exit`.
 
 
 ```javascript
