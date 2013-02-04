@@ -1,9 +1,12 @@
-var paperboy;
+(function() {
+var paperboy, test;
 try {
 	paperboy = require('../paperboy');
-	var test = require('tape');
+	test = require('tape');
 } catch(e) {
 	paperboy = window.paperboy;
+	test = window.test;
+	QUnit.config.notrycatch = true;
 }
 
 test('emitter', function(t) {
@@ -222,3 +225,4 @@ test('trigger.repeat', function(t) {
 // 	equal(result, 'BlackWhite', "When multiple events are triggered, they should be fired in the correct order.");
 // 
 // });
+})()

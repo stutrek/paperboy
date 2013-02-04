@@ -85,7 +85,7 @@ MIT Licensed
 		};
 		target.on.exit = function (type, callback, isOne) {
 			if (!stateStatuses[type]) {
-				callback.apply( target, stateArguments[type] );
+				callback.apply( target, stateArguments[type] || [] );
 				if (isOne) {
 					return;
 				}
@@ -147,7 +147,11 @@ MIT Licensed
 				args.shift();
 				callbacks = callbackContainer[type].slice();
 				for (var i = 0; i < callbacks.length; i++){
-					callbacks[i].callback.apply(target, args);
+					try {
+						callbacks[i].callback.apply(target, args);
+					} catch (e) {
+						window.console && console.error && console.error('error in callback for '+type+' event.', e);
+					}
 					if (callbacks[i].isOne) {
 						removeCallback( callbackContainer, false, type, callbacks[i].callback);
 					}
