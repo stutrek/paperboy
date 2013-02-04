@@ -1,7 +1,7 @@
 Paperboy
 ===========
 
-An event emitter and mixin with advanced features that don't get in the way.
+A lightweight event emitter and mixin with advanced features that don't get in the way.
 
 [![browser support](http://ci.testling.com/sakabako/paperboy.png)](http://ci.testling.com/sakabako/paperboy)
 
@@ -90,17 +90,34 @@ Emitters trigger event listeners. The `mixin` function turns any object into an 
 * `emitter.on( eventName, callback )` - adds a listener to the `eventName` event. `eventName` must be a string.
 * `emitter.off( eventName, callback )` - removes a listener from an event.
 * `emitter.one( eventName, callback )` - adds a listener that will remove itself after being triggered once.
-* `emitter.trigger( eventName /*, additional, arguments */ )` - triggeres all event handlers for `eventName`.
+* `emitter.trigger( eventName /*, additional, arguments */ )` - triggers all event handlers for `eventName`.
 * `emitter.trigger.repeat( otherEmitter /*, [eventNames] */ )` - Causes this emitter to repeat events triggered on another emitter.
 
 NOTE: `trigger` is not added by the mixin function. If you want trigger to be public you must attach it to the target yourself.
 
 ## Why Paperboy?
 
+### Simplicity
+* `on`/`off`/`one`/`trigger`. Just like jQuery and Backbone.
+* Learn the advanced features as you need them, they're never in the way.
+* Helpful error messages tell you which events are whitelisted or which callback caused an error.
+
+### Safety
 * Event listeners are always kept private.
-* Passing in a whitelist of event names can prevent bugs.
-* The `trigger` function is private by default, making it easier to write safe code. If you want it to be public simply add it to the target.
-* Removing a listener in a callback will not cause it to skip the next listener.
-* It's small, 1k minified and gzipped.
+* Passing in a whitelist of event names will prevent typos.
+* The `trigger` function is private by default. If you want it to be public simply add it to the target.
+* All callback errors are caught and logged. No subscriber can take down your event.
+* Listener arrays are copied before being iterated over; removing a listener in a callback will not cause a bug. This is overlooked in many pubsubs.
+
+### Features
+* Chain several emitters together in one module to easily unify a whole package.
+* Use the * event and a map of events->objects to make your code clear and concise.
+* Stateful events keep track of the state of your app.
+
+### Compatibility
+* Verified to work in IE6, Chrome 4, Firefox 3, and Safari 5.0.5 and above.
+* Works with or without RequireJS, Node, or other module systems.
+
+Also it's small. Just 1k minified and gzipped.
 
 Inspired by [LucidJS](https://github.com/RobertWHurst/LucidJS)

@@ -1,8 +1,8 @@
 {
   "name": "paperboy-events",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Stu Kabakoff <stukabakoff@gmail.com>",
-  "description": "A lightweight, chainable, safe event emitter and mixin.",
+  "description": "A lightweight event emitter and mixin with advanced features that don't get in the way.",
   "contributors": [ 
 	{
 	  "name": "Stu Kabakoff",
