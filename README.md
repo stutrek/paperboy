@@ -22,10 +22,36 @@ trigger('myevent', 5);
 
 ## Methods
 
-* `var trigger = paperboy.mixin( target )` - Adds `on`, `one`, and `off` to `target`. Returns the `trigger` function.
-* `paperboy.emitter()` -  Returns a new object with `on`, `one`, `off`, and `trigger` functions.
+* `var trigger = paperboy.mixin( target )` - Adds `on`, `one`, `off`, `is`, and `not` to `target`. Returns the `trigger` function.
+* `paperboy.emitter()` -  Returns a new object with `on`, `one`, `off`, `is`, and `not` `trigger` functions.
 
 _NOTE: `paperboy.mixin` returns the trigger function. It does not add it to the target._
+
+## `is` and `not`: Stateful Events
+
+You can create stateful events that operate similar to `$(document).ready()`. When a listener is added to a stateful event it is triggered immediately if your emitter is in that state.
+
+Stateful event listeners are added with `emitter.is` and `emitter.not`. Listeners added with `emitter.in` will be fired immediately if the emitter is in that state, or when the emitter enters that state if it is not. The reverse is true for `emitter.not`. The default for all states is `not`.
+
+
+```javascript
+emitter.is('live', callback1); // does not fire immediately.
+emitter.trigger.is('live'); // puts the emitter in 'live' state and fires the listener above.
+emitter.is('live', callback2); // fires immedately
+
+emitter.trigger.not('live'); // takes the emitter out of the live state.
+emitter.trigger.is('live'); // fires both listeners
+```
+
+Stateful listeners are removed with the `is.remove` and `not.remove` functions.
+```javascript
+emitter.is.remove('live', callback1); // removes callback1
+```
+
+Run-once functionality, like `emitter.one` is provided with `is.one` and `not.one`
+```javascript
+emitter.is.one('live', callback3); // callback3 will be called exactly once.
+```
 
 ## Whitelisting Events
 
@@ -41,22 +67,6 @@ var emitter = paperboy.emitter(['eventOne', 'eventTwo']);
 
 emitter.on('eventOne', function(){}); // works
 emitter.on('eventOen', function(){}); // throws an error
-```
-
-## Stateful Events
-
-You can create stateful events that operate similar to `$(document).ready()`. When a listener is added to a stateful event it is triggered immediately if your emitter is in that state.
-
-All of the emitter functions have two properties, `enter` and `exit`. Calling `trigger.enter` or `trigger.exit` sets the state of the emitter and triggers events applied with `emitter.on.enter` or `emitter.on.exit`.
-
-
-```javascript
-emitter.on.enter('live', function(){}); // does not fire immediately.
-emitter.trigger.enter('live'); // fires the listener above.
-emitter.on.enter('live', function(){}); // fires immedately
-
-emitter.trigger.exit('live'); // takes the emitter out of the live state.
-emitter.trigger.enter('live'); // fires both listeners
 ```
 
 ## Chaining Emitters

@@ -73,25 +73,25 @@ test('emitter.off', function(t) {
 	t.end && t.end();
 });
 
-test('emitter.on.enter', function(t) {
+test('emitter.is', function(t) {
 	t = t || window;
 	var emitter = paperboy.emitter(), fired = false, args = [], addedAfterExited = false, starWorks = false;
 
-	t.equal(typeof emitter.on.enter, 'function', 'emitter.on.enter should be a function.');
+	t.equal(typeof emitter.is, 'function', 'emitter.is should be a function.');
 
-	emitter.on.enter('exec', function() { fired = true; });
-	emitter.on.enter('*', function( type ) {
+	emitter.is('exec', function() { fired = true; });
+	emitter.is('*', function( type ) {
 		starWorks = type === 'exec';
 	})
-	emitter.trigger.enter('exec', 1, 2, 3);
+	emitter.trigger.is('exec', 1, 2, 3);
 	
-	emitter.on.enter('exec', function(){ 
+	emitter.is('exec', function(){ 
 		args = Array.prototype.slice.apply(arguments);
 	});
 
-	emitter.trigger.exit('exec', 1, 2, 3);
+	emitter.trigger.not('exec', 1, 2, 3);
 
-	emitter.on.enter('exec', function(){ 
+	emitter.is('exec', function(){ 
 		addedAfterExited = false;
 	});
 
@@ -103,35 +103,35 @@ test('emitter.on.enter', function(t) {
 	t.end && t.end();
 });
 
-test('emitter.on.exit', function(t) {
+test('emitter.not', function(t) {
 	t = t || window;
 	var emitter = paperboy.emitter(), firedInitially = false, addedWhileEnteredFired = false, args = [], starWorks = false;
 
-	t.equal(typeof emitter.on.exit, 'function', 'emitter.on.exit should be a function.');
+	t.equal(typeof emitter.not, 'function', 'emitter.not should be a function.');
 
 	
-	emitter.on.exit('exec', function() { firedInitially = true; });
+	emitter.not('exec', function() { firedInitially = true; });
 	
-	emitter.trigger.enter('exec', 3, 4, 5);
+	emitter.trigger.is('exec', 3, 4, 5);
 
-	emitter.on.exit('exec', function() {
+	emitter.not('exec', function() {
 		addedWhileEnteredFired = true; 
 	});
-	emitter.on.exit('*', function( type ) {
+	emitter.not('*', function( type ) {
 		starWorks = type === 'exec';
 	})
 	
 	t.equal( firedInitially, true, 'default state is exited');
-	t.equal( addedWhileEnteredFired, false, 'exit does not get fired while the state is entered');
+	t.equal( addedWhileEnteredFired, false, 'not does not get fired while the state is entered');
 
-	emitter.on.exit('exec', function(){ 
+	emitter.not('exec', function(){ 
 		args = Array.prototype.slice.apply(arguments);
 	});
 	
-	emitter.trigger.exit('exec', 1, 2, 3);
+	emitter.trigger.not('exec', 1, 2, 3);
 
-	t.equal( addedWhileEnteredFired, true, 'exit listeners are called on exit');
-	t.ok(args[0] === 1 && args[1] === 2 && args[2] === 3, 'Arguments should be preserved and used for future exit callbacks');
+	t.equal( addedWhileEnteredFired, true, 'not listeners are called on not');
+	t.ok(args[0] === 1 && args[1] === 2 && args[2] === 3, 'Arguments should be preserved and used for future not callbacks');
 	t.ok( starWorks, '* events are working.');
 	
 	t.end && t.end();
@@ -164,6 +164,42 @@ test('emitter.trigger', function(t) {
 	t.end && t.end();
 });
 
+test('Error handling', function(t) {
+	t = t || window;
+	var emitter = paperboy.emitter(), stillRan = false, stillRanBefore = false, stillRanBeforeStar = false, stillRanStar = false;
+
+	emitter.on('evt', function() {
+		stillRanBefore = true;
+	});
+
+	emitter.on('evt', function() {
+		throw new Error('oops!');
+	});
+
+	emitter.on('evt', function() {
+		stillRan = true;
+	});
+
+	emitter.on('*', function() {
+		stillRanBeforeStar = true;
+	});
+	emitter.on('*', function() {
+		throw new Error('oopsie daisy!');
+	});
+	emitter.on('*', function() {
+		stillRanStar = true;
+	});
+
+	emitter.trigger('evt');
+
+	ok(stillRanBefore, 'Listeners added before an error still run.');
+	ok(stillRan, 'Listeners added after an error still run.');
+	ok(stillRanBeforeStar, 'Listeners added to * before an error still run.');
+	ok(stillRanStar, 'Listeners added to * after an error still run.');
+
+	t.end && t.end();
+});
+
 test('trigger.repeat', function(t) {
 	t = t || window;
 	var emitterA = paperboy.emitter(), emitterB = paperboy.emitter(), emitterC = paperboy.emitter(), results = [], stateEnterWorks = false, stateExitWorks = false;
@@ -187,18 +223,18 @@ test('trigger.repeat', function(t) {
 		results.push('event');
 	});
 
-	emitterA.on.enter('state', function(){
+	emitterA.is('state', function(){
 		stateEnterWorks = true;
 	});
-	t.equal( stateEnterWorks, false, 'enter was not called early' );
-	emitterB.trigger.enter('state');
-	t.equal( stateEnterWorks, true, 'enter was called on time' );
+	t.equal( stateEnterWorks, false, 'is was not called early' );
+	emitterB.trigger.is('state');
+	t.equal( stateEnterWorks, true, 'is was called on time' );
 
-	emitterA.on.exit('state', function(){
+	emitterA.not('state', function(){
 		stateExitWorks = true;
 	});
 	t.equal( stateExitWorks, false, 'exit is not called early' );
-	emitterB.trigger.exit('state');
+	emitterB.trigger.not('state');
 	t.equal( stateExitWorks, true, 'exit is called on time' );
 
 	emitterB.trigger('one');

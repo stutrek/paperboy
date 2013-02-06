@@ -38,8 +38,8 @@ MIT Licensed
 		var events = {'*':[]};
 		var enforceTypes = !!eventTypes;
 
-		var enterStateCallbacks = {'*':[]};
-		var exitStateCallbacks = {'*':[]};
+		var inStateCallbacks = {'*':[]};
+		var outStateCallbacks = {'*':[]};
 		var stateStatuses = {};
 		var stateArguments = {};
 		var enforceStates = !!stateTypes;
@@ -52,8 +52,8 @@ MIT Licensed
 
 		if (stateTypes) {
 			for (var i = 0; i < stateTypes.length; i += 1) {
-				enterStateCallbacks[stateTypes[i]] = [];
-				exitStateCallbacks[stateTypes[i]] = [];
+				inStateCallbacks[stateTypes[i]] = [];
+				outStateCallbacks[stateTypes[i]] = [];
 			}
 		}
 		
@@ -61,6 +61,7 @@ MIT Licensed
 			throw new Error('tried to '+triedTo+' a non-existent event type: '+eventName+'. Options are: '+eventTypes.join(', '));
 		}
 
+		// Acutal implementations of on/off/trigger
 		function addCallback( callbackContainer, enforced, type, callback, isOne ) {
 			isOne = !!isOne;
 			if (enforced && !callbackContainer[type]) {
@@ -70,38 +71,6 @@ MIT Licensed
 			}
 			callbackContainer[type].push({callback: callback, isOne: isOne});
 		}
-
-		target.on = function (type, callback, isOne) {
-			addCallback( events, enforceTypes, type, callback, isOne );
-		};
-		target.on.enter = function (type, callback, isOne) {
-			if (stateStatuses[type]) {
-				callback.apply( target, stateArguments[type] );
-				if (isOne) {
-					return;
-				}
-			}
-			addCallback( enterStateCallbacks, enforceStates, type, callback, isOne );
-		};
-		target.on.exit = function (type, callback, isOne) {
-			if (!stateStatuses[type]) {
-				callback.apply( target, stateArguments[type] || [] );
-				if (isOne) {
-					return;
-				}
-			}
-			addCallback( exitStateCallbacks, enforceStates, type, callback, isOne );
-		};
-
-		target.one = function (type, callback) {
-			target.on(type, callback, true);
-		};
-		target.one.enter = function (type, callback) {
-			target.on.enter(type, callback, true);
-		};
-		target.one.exit = function (type, callback) {
-			target.on.exit(type, callback, true);
-		};
 
 		function removeCallback( callbackContainer, enforced, type, callback ) {
 			if (enforced && !callbackContainer[type]) {
@@ -116,16 +85,6 @@ MIT Licensed
 				}
 			}
 		}
-		target.off = function (type, callback) {
-			removeCallback( events, enforceTypes, type, callback );
-		};
-		target.off.enter = function (type, callback) {
-			removeCallback( enterStateCallbacks, enforceTypes, type, callback );
-		};
-		target.off.exit = function (type, callback) {
-			removeCallback( exitStateCallbacks, enforceTypes, type, callback );
-		};
-
 
 		function triggerCallbacks( callbackContainer, enforced, args ) {
 			var type = args[0];
@@ -137,7 +96,11 @@ MIT Licensed
 			// trigger all * events
 			var callbacks = callbackContainer['*'].slice();
 			for (var i = 0; i < callbacks.length; i++){
-				callbacks[i].callback.apply(target, args);
+				try {
+					callbacks[i].callback.apply(target, args);
+				} catch (e) {
+					window.console && console.error && console.error('error in callback for * event running '+type+' event.', e);
+				}
 				if (callbacks[i].isOne) {
 					target.off(type, callbacks[i].callback);
 				}
@@ -159,25 +122,75 @@ MIT Licensed
 			}			
 		}
 
+		// Normal on/off
+		target.on = function( type, callback, isOne ) {
+			addCallback( events, enforceTypes, type, callback, isOne );
+		};
+		target.one = function (type, callback) {
+			target.on(type, callback, true);
+		};
+		target.off = target.on.remove = function( type, callback ) {
+			removeCallback( events, enforceTypes, type, callback );
+		};
+
+
+		// is in stateful events
+		target.is = function( type, callback, isOne ) {
+			if (stateStatuses[type]) {
+				callback.apply( target, stateArguments[type] );
+				if (isOne) {
+					return;
+				}
+			}
+			addCallback( inStateCallbacks, enforceStates, type, callback, isOne );
+		};
+		target.is.one = function( type, callback ) {
+			target.in( type, callback, true );
+		};
+		target.is.remove = function (type, callback) {
+			removeCallback( inStateCallbacks, enforceTypes, type, callback );
+		};
+
+		// is not in stateful events
+		target.not = function( type, callback, isOne ) {
+			if (!stateStatuses[type]) {
+				callback.apply( target, stateArguments[type] || [] );
+				if (isOne) {
+					return;
+				}
+			}
+			addCallback( outStateCallbacks, enforceStates, type, callback, isOne );
+		};
+		target.not.one = function( type, callback ) {
+			target.out( type, callback, true );
+		}
+		target.not.remove = function( type, callback ) {
+			removeCallback( outStateCallbacks, enforceTypes, type, callback );
+		};
+
+
+		// triggering
 		var trigger = function ( /* type, args... */ ){
 			var args = aps.call( arguments );
 			triggerCallbacks( events, enforceTypes, args );
 		};
-		trigger.enter = function(type /*, args */) {
+		trigger.is = function(type /*, args */) {
 			if (stateStatuses[type]) { return; }
 			var args = aps.call(arguments);
 			stateStatuses[type] = true;
 			stateArguments[type] = args.slice(1);
-			triggerCallbacks( enterStateCallbacks, enforceStates, args );
+			triggerCallbacks( inStateCallbacks, enforceStates, args );
 		};
-		trigger.exit = function(type /*, args */) {
+		trigger.not = function(type /*, args */) {
 			if (!stateStatuses[type]) { return; }
 			var args = aps.call(arguments);
 			stateStatuses[type] = false;
 			stateArguments[type] = args.slice(1);
-			triggerCallbacks( exitStateCallbacks, enforceStates, args );
+			triggerCallbacks( outStateCallbacks, enforceStates, args );
 		};
 
+		// checks to see if an emitter accepts events.
+		// this helps repeaters throw meaningful errors.
 		target.on.accepts = function( eventName ) {
 			if (enforceTypes) {
 				return indexOf( eventTypes, eventName) !== -1;
@@ -185,7 +198,7 @@ MIT Licensed
 				return true;
 			}
 		};
-		target.on.enter.accepts = target.on.exit.accepts = function( stateName ) {
+		target.is.accepts = function( stateName ) {
 			if (enforceStates) {
 				return indexOf( stateTypes, stateName) !== -1;
 			} else {
@@ -194,7 +207,7 @@ MIT Licensed
 		};
 
 		
-		
+		// Repeating
 		trigger.repeat = function( emitter, events ) {
 			if (events) {
 				for (var i = 0; i < events.length; i += 1 ) {
@@ -221,17 +234,17 @@ MIT Licensed
 		trigger.repeatStates = function( emitter, events ) {
 			if (events) {
 				for (var i = 0; i < events.length; i += 1) {
-					if (target.on.enter.accepts(events[i])) {
+					if (target.is.accepts(events[i])) {
 						(function (eventName) {
-							emitter.on.enter(eventName, function() {
+							emitter.is(eventName, function() {
 								var args = aps.call(arguments);
 								args.unshift(eventName);
-								trigger.enter.apply( target, args );
+								trigger.is.apply( target, args );
 							});
-							emitter.on.exit(eventName, function() {
+							emitter.not(eventName, function() {
 								var args = aps.call(arguments);
 								args.unshift(eventName);
-								trigger.exit.apply( target, args );
+								trigger.not.apply( target, args );
 							});
 						})(events[i]);
 					} else {
@@ -239,16 +252,14 @@ MIT Licensed
 					}
 				}
 			} else {
-				emitter.on.enter('*', function () {
-					trigger.enter.apply( target, arguments );
+				emitter.is('*', function () {
+					trigger.is.apply( target, arguments );
 				});
-				emitter.on.exit('*', function () {
-					trigger.exit.apply( target, arguments );
+				emitter.not('*', function () {
+					trigger.not.apply( target, arguments );
 				});
 			}
 		};
-		
-		
 		
 		return trigger;
 	};
