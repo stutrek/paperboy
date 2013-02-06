@@ -145,7 +145,7 @@ MIT Licensed
 			addCallback( inStateCallbacks, enforceStates, type, callback, isOne );
 		};
 		target.is.one = function( type, callback ) {
-			target.in( type, callback, true );
+			target.is( type, callback, true );
 		};
 		target.is.remove = function (type, callback) {
 			removeCallback( inStateCallbacks, enforceTypes, type, callback );
