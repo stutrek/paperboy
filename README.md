@@ -23,16 +23,15 @@ trigger('myevent', 5);
 ## Methods
 
 * `var trigger = paperboy.mixin( target )` - Adds `on`, `one`, `off`, `is`, and `not` to `target`. Returns the `trigger` function.
-* `paperboy.emitter()` -  Returns a new object with `on`, `one`, `off`, `is`, and `not` `trigger` functions.
+* `paperboy.emitter()` -  Returns a new object with `on`, `one`, `off`, `is`, `not`, and `trigger` functions.
 
 _NOTE: `paperboy.mixin` returns the trigger function. It does not add it to the target._
 
 ## `is` and `not`: Stateful Events
 
-You can create stateful events that operate similar to `$(document).ready()`. When a listener is added to a stateful event it is triggered immediately if your emitter is in that state.
+Stateful event listeners operate are added with `emitter.is` and `emitter.not`. They operate similar to `$(document).ready()`; when a listener is added to a stateful event it is triggered immediately if your emitter is in that state.
 
-Stateful event listeners are added with `emitter.is` and `emitter.not`. Listeners added with `emitter.in` will be fired immediately if the emitter is in that state, or when the emitter enters that state if it is not. The reverse is true for `emitter.not`. The default for all states is `not`.
-
+Listeners added with `emitter.in` apply when the emitter is in a state, listeners on `emitter.not` apply when the emitter is not in a state.
 
 ```javascript
 emitter.is('live', callback1); // does not fire immediately.
@@ -52,6 +51,8 @@ Run-once functionality, like `emitter.one` is provided with `is.one` and `not.on
 ```javascript
 emitter.is.one('live', callback3); // callback3 will be called exactly once.
 ```
+
+Until an emitter is put in a state with `trigger.is`, listeners applied to `not` will be exectued immediately.
 
 ## Whitelisting Events
 

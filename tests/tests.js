@@ -192,10 +192,10 @@ test('Error handling', function(t) {
 
 	emitter.trigger('evt');
 
-	ok(stillRanBefore, 'Listeners added before an error still run.');
-	ok(stillRan, 'Listeners added after an error still run.');
-	ok(stillRanBeforeStar, 'Listeners added to * before an error still run.');
-	ok(stillRanStar, 'Listeners added to * after an error still run.');
+	t.ok(stillRanBefore, 'Listeners added before an error still run.');
+	t.ok(stillRan, 'Listeners added after an error still run.');
+	t.ok(stillRanBeforeStar, 'Listeners added to * before an error still run.');
+	t.ok(stillRanStar, 'Listeners added to * after an error still run.');
 
 	t.end && t.end();
 });
