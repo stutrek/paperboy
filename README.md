@@ -22,16 +22,32 @@ trigger('myevent', 5);
 
 ## Methods
 
-* `var trigger = paperboy.mixin( target )` - Adds `on`, `one`, `off`, `is`, and `not` to `target`. Returns the `trigger` function.
-* `paperboy.emitter()` -  Returns a new object with `on`, `one`, `off`, `is`, `not`, and `trigger` functions.
+* `var trigger = paperboy.mixin( target )` - Adds on, off, one, is, and not to target. Returns the trigger function.
+* `paperboy.emitter()` -  Returns a new object with on, off, one, is, not, and trigger functions.
 
 _NOTE: `paperboy.mixin` returns the trigger function. It does not add it to the target._
 
-## `is` and `not`: Stateful Events
+## Emitter Details
 
-Stateful event listeners operate are added with `emitter.is` and `emitter.not`. They operate similar to `$(document).ready()`; when a listener is added to a stateful event it is triggered immediately if your emitter is in that state.
+Emitters trigger event listeners. The `mixin` function turns any object into an emitter.
 
-Listeners added with `emitter.in` apply when the emitter is in a state, listeners on `emitter.not` apply when the emitter is not in a state.
+* `emitter.on( eventName, callback )` - adds a listener to the `eventName` event. `eventName` must be a string.
+* `emitter.off( eventName, callback )` - removes a listener from an event.
+* `emitter.one( eventName, callback )` - adds a listener that will remove itself after being triggered once.
+* `emitter.is( stateName, callback )` - adds a state listener that will be called when the emitter is in `stateName`.
+* `emitter.not( stateName, callback )` - adds a state listener that will be called when the emitter is not in `stateName`.
+* `emitter.trigger( eventName /*, additional, arguments */ )` - triggers all event handlers for `eventName`.
+* `emitter.trigger.is( stateName /*, additional, arguments */ )` - triggers all handlers for `stateName` and puts the emitter in the `stateName` state.
+* `emitter.trigger.not( stateName /*, additional, arguments */ )` - triggers all handlers for not `stateName` and takes the emitter out of `stateName` state.
+* `emitter.trigger.repeat( otherEmitter /*, [eventNames], [stateNames] */ )` - Causes this emitter to repeat events triggered on another emitter.
+
+NOTE: `trigger` is not added by the mixin function. If you want trigger to be public you must attach it to the target yourself.
+
+## Stateful Events: `is` and `not`
+
+Stateful event listeners operate like `$(document).ready()` and deferreds; when a listener is added to a stateful event it is triggered immediately if your emitter is in that state.
+
+Listeners added with `emitter.in` apply when the emitter is in a state, listeners on `emitter.not` apply when the emitter is not in a state. States are set with `trigger.is` and `trigger.not`. Listeners added to `emitter.not` will fire immediately if no states have been declared.
 
 ```javascript
 emitter.is('live', callback1); // does not fire immediately.
@@ -93,18 +109,6 @@ emitter.trigger.repeatStates( otherPaperboyEmitter /*, [optional, event, names] 
 ## The Magic `*` Event
 
 Listeners applied to the `*` event will be triggered for each event. The first argument will be the event name.
-
-## Emitter Details
-
-Emitters trigger event listeners. The `mixin` function turns any object into an emitter.
-
-* `emitter.on( eventName, callback )` - adds a listener to the `eventName` event. `eventName` must be a string.
-* `emitter.off( eventName, callback )` - removes a listener from an event.
-* `emitter.one( eventName, callback )` - adds a listener that will remove itself after being triggered once.
-* `emitter.trigger( eventName /*, additional, arguments */ )` - triggers all event handlers for `eventName`.
-* `emitter.trigger.repeat( otherEmitter /*, [eventNames] */ )` - Causes this emitter to repeat events triggered on another emitter.
-
-NOTE: `trigger` is not added by the mixin function. If you want trigger to be public you must attach it to the target yourself.
 
 ## Why Paperboy?
 
