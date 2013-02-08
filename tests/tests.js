@@ -208,7 +208,6 @@ test('trigger.repeat', function(t) {
 
 	emitterA.trigger.repeat(emitterB, ['one', 'two', 'three']);
 	emitterA.trigger.repeat(emitterC);
-	emitterA.trigger.repeatStates(emitterB);
 		
 	emitterA.on('one', function() {
 		results.push('one');

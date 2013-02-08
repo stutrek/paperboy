@@ -208,7 +208,7 @@ MIT Licensed
 
 		
 		// Repeating
-		trigger.repeat = function( emitter, events ) {
+		trigger.repeat = function( emitter, events, states ) {
 			if (events) {
 				for (var i = 0; i < events.length; i += 1 ) {
 					// if it's not a paperboy emitter, or is a paperboy emitter that supports this event
@@ -229,29 +229,26 @@ MIT Licensed
 					trigger.apply( target, arguments );
 				});
 			}
-		};
-
-		trigger.repeatStates = function( emitter, events ) {
-			if (events) {
-				for (var i = 0; i < events.length; i += 1) {
-					if (target.is.accepts(events[i])) {
-						(function (eventName) {
-							emitter.is(eventName, function() {
+			if (states) {
+				for (var i = 0; i < states.length; i += 1) {
+					if (target.is.accepts(states[i])) {
+						(function (stateName) {
+							emitter.is(stateName, function() {
 								var args = aps.call(arguments);
-								args.unshift(eventName);
+								args.unshift(stateName);
 								trigger.is.apply( target, args );
 							});
-							emitter.not(eventName, function() {
+							emitter.not(stateName, function() {
 								var args = aps.call(arguments);
-								args.unshift(eventName);
+								args.unshift(stateName);
 								trigger.not.apply( target, args );
 							});
-						})(events[i]);
+						})(states[i]);
 					} else {
 						error( 'repeat state', events[i] );
 					}
 				}
-			} else {
+			} else if (states !== false) {
 				emitter.is('*', function () {
 					trigger.is.apply( target, arguments );
 				});
