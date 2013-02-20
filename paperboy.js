@@ -38,8 +38,8 @@ MIT Licensed
 		var events = {'*':[]};
 		var enforceTypes = !!eventTypes;
 
-		var inStateCallbacks = {'*':[]};
-		var outStateCallbacks = {'*':[]};
+		var isStateCallbacks = {'*':[]};
+		var notStateCallbacks = {'*':[]};
 		var stateStatuses = {};
 		var stateArguments = {};
 		var enforceStates = !!stateTypes;
@@ -52,8 +52,8 @@ MIT Licensed
 
 		if (stateTypes) {
 			for (var i = 0; i < stateTypes.length; i += 1) {
-				inStateCallbacks[stateTypes[i]] = [];
-				outStateCallbacks[stateTypes[i]] = [];
+				isStateCallbacks[stateTypes[i]] = [];
+				notStateCallbacks[stateTypes[i]] = [];
 			}
 		}
 		
@@ -142,13 +142,13 @@ MIT Licensed
 					return;
 				}
 			}
-			addCallback( inStateCallbacks, enforceStates, type, callback, isOne );
+			addCallback( isStateCallbacks, enforceStates, type, callback, isOne );
 		};
 		target.is.one = function( type, callback ) {
 			target.is( type, callback, true );
 		};
 		target.is.remove = function (type, callback) {
-			removeCallback( inStateCallbacks, enforceTypes, type, callback );
+			removeCallback( isStateCallbacks, enforceTypes, type, callback );
 		};
 
 		// is not in stateful events
@@ -159,13 +159,13 @@ MIT Licensed
 					return;
 				}
 			}
-			addCallback( outStateCallbacks, enforceStates, type, callback, isOne );
+			addCallback( notStateCallbacks, enforceStates, type, callback, isOne );
 		};
 		target.not.one = function( type, callback ) {
-			target.out( type, callback, true );
+			target.not( type, callback, true );
 		}
 		target.not.remove = function( type, callback ) {
-			removeCallback( outStateCallbacks, enforceTypes, type, callback );
+			removeCallback( notStateCallbacks, enforceTypes, type, callback );
 		};
 
 
@@ -179,14 +179,14 @@ MIT Licensed
 			var args = aps.call(arguments);
 			stateStatuses[type] = true;
 			stateArguments[type] = args.slice(1);
-			triggerCallbacks( inStateCallbacks, enforceStates, args );
+			triggerCallbacks( isStateCallbacks, enforceStates, args );
 		};
 		trigger.not = function(type /*, args */) {
 			if (!stateStatuses[type]) { return; }
 			var args = aps.call(arguments);
 			stateStatuses[type] = false;
 			stateArguments[type] = args.slice(1);
-			triggerCallbacks( outStateCallbacks, enforceStates, args );
+			triggerCallbacks( notStateCallbacks, enforceStates, args );
 		};
 
 		// checks to see if an emitter accepts events.
