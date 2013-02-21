@@ -41,18 +41,19 @@ Emitters trigger event listeners. The `mixin` function turns any object into an 
 
 ### Removing Listeners
 * `emitter.off( eventName, callback )` - removes a listener from an event.
-* `emitter.is.off( eventName, callback )` - removes a listener from a stateful event.
-* `emitter.not.off( eventName, callback )` - removes a listener from a stateful event.
+* `emitter.is.remove( eventName, callback )` - removes a listener from a stateful event.
+* `emitter.not.remove( eventName, callback )` - removes a listener from a stateful event.
 
 ### Triggering Events
 * `emitter.trigger( eventName /*, add'l, args */ )` - triggers all event handlers for `eventName`.
 * `emitter.trigger.is( stateName /*, add'l, args */ )` - puts the emitter in the `stateName` state and triggers stateful listeners.
 * `emitter.trigger.not( stateName /*, add'l, args */ )` - takes the emitter out of `stateName` state and triggers stateful listeners.
 
+NOTE: `trigger` is not added by the mixin function. If you want trigger to be public you must attach it to the target yourself.
+
 ### Repeating Events
 * `emitter.trigger.repeat( otherEmitter /*, [eventNames], [stateNames] */ )` - Causes this emitter to repeat events triggered on another emitter.
 
-NOTE: `trigger` is not added by the mixin function. If you want trigger to be public you must attach it to the target yourself.
 
 ## Stateful Events: `is` and `not`
 
