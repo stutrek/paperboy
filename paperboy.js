@@ -248,7 +248,7 @@ MIT Licensed
 						error( 'repeat state', events[i] );
 					}
 				}
-			} else if (states !== false) {
+			} else if (states !== false && emitter.is && emitter.is.accepts) {
 				emitter.is('*', function () {
 					trigger.is.apply( target, arguments );
 				});
