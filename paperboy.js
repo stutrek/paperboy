@@ -32,6 +32,17 @@ MIT Licensed
 		}
 		return -1;
 	}
+
+	var errorLogFn = window.console && console.error ? 'error' : 'log';
+	function logError( type, error, functionWithError ) {
+		if (window.console) {
+			console[errorLogFn]('Error in callback for '+type+' event. '+error.message);
+			console.log(error);
+			// inspect functionWithError to see which function it is.
+			// Firefox has error.lineNumber and error.fileName.
+			// Chrome has error.stack.
+		}
+	}
 	
 	exports.mixin = function( target, eventTypes, stateTypes ){
 		
@@ -99,7 +110,8 @@ MIT Licensed
 				try {
 					callbacks[i].callback.apply(target, args);
 				} catch (e) {
-					window.console && console.error && console.error('error in callback for * event running '+type+' event.', e);
+					logError( '*', e, callbacks[i].callback );
+
 				}
 				if (callbacks[i].isOne) {
 					target.off(type, callbacks[i].callback);
@@ -113,7 +125,7 @@ MIT Licensed
 					try {
 						callbacks[i].callback.apply(target, args);
 					} catch (e) {
-						window.console && console.error && console.error('error in callback for '+type+' event.', e);
+						logError( type, e, callbacks[i].callback );
 					}
 					if (callbacks[i].isOne) {
 						removeCallback( callbackContainer, false, type, callbacks[i].callback);
@@ -163,7 +175,7 @@ MIT Licensed
 		};
 		target.not.one = function( type, callback ) {
 			target.not( type, callback, true );
-		}
+		};
 		target.not.remove = function( type, callback ) {
 			removeCallback( notStateCallbacks, enforceTypes, type, callback );
 		};
