@@ -164,6 +164,33 @@ test('emitter.trigger', function(t) {
 	t.end && t.end();
 });
 
+test('emitter.trigger with wildcards', function(t) {
+	t = t || window;
+	var emitter = paperboy.emitter(), results = [];
+
+	t.equal(typeof emitter.trigger, 'function', 'emitter.trigger should be a function.');
+
+	emitter.on('red.*', function(red) {
+		results.push(red);
+	});
+	emitter.on('blue.green', function(red, blue) {
+		results.push(blue);
+	});
+	emitter.on('*.green', function(red, blue, green) {
+		results.push(green);
+	});
+	emitter.on('green', function() {
+		results.pop();
+	});
+
+	emitter.trigger('red.blue', 'red', 'blue', 'green');
+	emitter.trigger('blue.green', 'red', 'blue', 'green');
+	emitter.trigger('red.green', 'red', 'blue', 'green');
+
+	t.equal(results.toString(), ['red', 'blue', 'green', 'red', 'green'].toString(), "When multiple events are triggered, they should be fired in the correct order.");
+	t.end && t.end();
+});
+
 test('Error handling', function(t) {
 	t = t || window;
 	var emitter = paperboy.emitter(), stillRan = false, stillRanBefore = false, stillRanBeforeStar = false, stillRanStar = false;

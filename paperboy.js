@@ -33,6 +33,17 @@ MIT Licensed
 		return -1;
 	}
 
+	function stateMatchesWildcard (eventName, wildcard, index) {
+		if (!wildcard[index]) {
+			return true;
+		}
+		if (wildcard[index] === '*' || wildcard[index] === eventName[index]) {
+			return stateMatchesWildcard( eventName, wildcard, index+1);
+		} else {
+			return false;
+		}
+	}
+
 	var errorLogFn = window.console && console.error ? 'error' : 'log';
 	function logError( type, error, functionWithError ) {
 		if (window.console) {
@@ -84,15 +95,29 @@ MIT Licensed
 		}
 
 		function removeCallback( callbackContainer, enforced, type, callback ) {
-			if (enforced && !callbackContainer[type]) {
+			if (enforced && !callbackContainer) {
 				error( 'remove', type );
-			} else if (!callbackContainer[type]) {
+			} else if (!callbackContainer) {
 				return;
 			}
-			for (var i = 0, callbackObj; callbackObj = callbackContainer[type][i]; i += 1) {
+			for (var i = 0, callbackObj; callbackObj = callbackContainer[i]; i += 1) {
 				if (callbackObj.callback === callback) {
-					callbackContainer[type].splice(i, 1);
+					callbackContainer.splice(i, 1);
 					return;
+				}
+			}
+		}
+
+		function triggerCallbackArray( callbackContainer, target, args, type, logType ) {
+			var callbacks = callbackContainer.slice();
+			for (var i = 0; i < callbacks.length; i++){
+				try {
+					callbacks[i].callback.apply(target, args);
+				} catch (e) {
+					logError( logType, e, callbacks[i].callback );
+				}
+				if (callbacks[i].isOne) {
+					removeCallback( callbackContainer, false, type, callbacks[i].callback);
 				}
 			}
 		}
@@ -101,37 +126,22 @@ MIT Licensed
 			var type = args[0];
 			if (enforced && !callbackContainer[type]) {
 				error( 'trigger', type );
-			} else if (!callbackContainer[type] && callbackContainer['*'].length === 0) {
-				return;
 			}
-			// trigger all * events
-			var callbacks = callbackContainer['*'].slice();
-			for (var i = 0; i < callbacks.length; i++){
-				try {
-					callbacks[i].callback.apply(target, args);
-				} catch (e) {
-					logError( '*', e, callbacks[i].callback );
 
-				}
-				if (callbacks[i].isOne) {
-					target.off(type, callbacks[i].callback);
+			// trigger all * events
+			if (callbackContainer['*']) {
+				triggerCallbackArray( callbackContainer['*'], target, args, type, type );
+			}
+			
+			args.shift();
+			// trigger listeners for this type, if any
+			var eventArray = type.split(/[\.:]/g);
+			for (var key in callbackContainer) {
+				var keyArray = key.split(/[\.:]/g);
+				if (key !== '*' && callbackContainer.hasOwnProperty(key) && stateMatchesWildcard(eventArray, keyArray, 0)) {
+					triggerCallbackArray( callbackContainer[key], target, args, type, type );
 				}
 			}
-			// trigger listeners for this type, if any
-			if (callbackContainer[type]) {
-				args.shift();
-				callbacks = callbackContainer[type].slice();
-				for (var i = 0; i < callbacks.length; i++){
-					try {
-						callbacks[i].callback.apply(target, args);
-					} catch (e) {
-						logError( type, e, callbacks[i].callback );
-					}
-					if (callbacks[i].isOne) {
-						removeCallback( callbackContainer, false, type, callbacks[i].callback);
-					}
-				}
-			}			
 		}
 
 		// Normal on/off
@@ -142,7 +152,7 @@ MIT Licensed
 			target.on(type, callback, true);
 		};
 		target.off = target.on.remove = function( type, callback ) {
-			removeCallback( events, enforceTypes, type, callback );
+			removeCallback( events[type], enforceTypes, type, callback );
 		};
 
 
@@ -160,7 +170,7 @@ MIT Licensed
 			target.is( type, callback, true );
 		};
 		target.is.remove = function (type, callback) {
-			removeCallback( isStateCallbacks, enforceTypes, type, callback );
+			removeCallback( isStateCallbacks[type], enforceTypes, type, callback );
 		};
 
 		// is not in stateful events
@@ -177,7 +187,7 @@ MIT Licensed
 			target.not( type, callback, true );
 		};
 		target.not.remove = function( type, callback ) {
-			removeCallback( notStateCallbacks, enforceTypes, type, callback );
+			removeCallback( notStateCallbacks[type], enforceTypes, type, callback );
 		};
 
 
