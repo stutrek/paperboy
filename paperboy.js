@@ -33,16 +33,23 @@ MIT Licensed
 		return -1;
 	}
 
-	function stateMatchesWildcard (eventName, wildcard, index) {
-		if (!wildcard[index]) {
+	function stateArrayMatchesWildcardArray (eventNameArray, wildcardArray, index) {
+		if (!eventNameArray[index] && wildcardArray[index]) {
+			return false;
+		}
+		if (!wildcardArray[index]) {
 			return true;
 		}
-		if (wildcard[index] === '*' || wildcard[index] === eventName[index]) {
-			return stateMatchesWildcard( eventName, wildcard, index+1);
+		if (wildcardArray[index] === '*' || wildcardArray[index] === eventNameArray[index]) {
+			return stateArrayMatchesWildcardArray( eventNameArray, wildcardArray, index+1);
 		} else {
 			return false;
 		}
 	}
+
+	exports.isWildcardMatch = function (eventName, wildcard) {
+		return stateArrayMatchesWildcardArray( eventName.split(/[\.:]/g), wildcard.split(/[\.:]/g), 0);
+	};
 
 	var errorLogFn = window.console && console.error ? 'error' : 'log';
 	function logError( type, error, functionWithError ) {
@@ -138,7 +145,7 @@ MIT Licensed
 			var eventArray = type.split(/[\.:]/g);
 			for (var key in callbackContainer) {
 				var keyArray = key.split(/[\.:]/g);
-				if (key !== '*' && callbackContainer.hasOwnProperty(key) && stateMatchesWildcard(eventArray, keyArray, 0)) {
+				if (key !== '*' && callbackContainer.hasOwnProperty(key) && stateArrayMatchesWildcardArray(eventArray, keyArray, 0)) {
 					triggerCallbackArray( callbackContainer[key], target, args, type, type );
 				}
 			}

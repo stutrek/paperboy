@@ -274,6 +274,27 @@ test('trigger.repeat', function(t) {
 	t.end && t.end();
 });
 
+test('wildcard matching', function(t) {
+	t = t || window;
+
+	t.ok( paperboy.isWildcardMatch('hi', 'hi'), 'a single name.');
+	t.ok( !paperboy.isWildcardMatch('hi', 'bye'), 'different names do not match.');
+
+	t.ok( paperboy.isWildcardMatch('hi.there', 'hi.*'), 'a single wildcard at the end.');
+	t.ok( !paperboy.isWildcardMatch('hi.there', 'bye.*'), 'a single wildcard at the end of a different event.');
+
+	t.ok( paperboy.isWildcardMatch('hi.there', '*.there'), 'a single wildcard at the beginning.');
+	t.ok( !paperboy.isWildcardMatch('bye.there', '*.somewhereelse'), 'a single wildcard at the beginning followed by something that does not match.');
+
+	t.ok( paperboy.isWildcardMatch('hi.there.buddy', 'hi.*.buddy'), 'a wildcard in the middle.');
+	t.ok( !paperboy.isWildcardMatch('hi.there.enemy', 'bye.*.enemy'), 'a wildcard in the middle of a non-matching event.');
+
+	t.ok( paperboy.isWildcardMatch('hi.there.buddy', 'hi.*'), 'a wildcard shorter than the event name.');
+	t.ok( !paperboy.isWildcardMatch('hi.there', 'hi.*.*'), 'a wildcard longer than the event name should not match.');
+
+	t.end && t.end();
+});
+
 // test('emitter.set', function() {
 // 	var emitter = paperboy.emitter(), result = '';
 // 
