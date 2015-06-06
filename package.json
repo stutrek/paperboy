@@ -1,7 +1,8 @@
 {
   "name": "paperboy-events",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "author": "Stu Kabakoff <stukabakoff@gmail.com>",
+  "main": "paperboy.js",
   "description": "A lightweight event emitter and mixin with advanced features that don't get in the way.",
   "contributors": [ 
 	{
